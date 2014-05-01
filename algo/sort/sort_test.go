@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/joshuarubin/gil"
-	"github.com/kr/pretty"
 )
 
 func TestMergeSort(t *testing.T) {
@@ -24,8 +23,6 @@ func TestMergeSort(t *testing.T) {
 	if err != nil {
 		t.Fatal("unexpected sort error")
 	}
-
-	pretty.Println(sorted)
 
 	if len(sorted) != l {
 		t.Fatal("list lenght changed")
