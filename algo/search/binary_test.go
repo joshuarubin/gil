@@ -16,10 +16,10 @@ func TestBinarySearch(t *testing.T) {
 	expect := map[gil.Int]Result{
 		0:  {0, gil.RangeError{gil.Int(0)}},
 		1:  {0, nil},
-		2:  {0, gil.NotFound{gil.Int(2)}},
+		2:  {0, gil.NotFoundError{gil.Int(2)}},
 		3:  {1, nil},
 		5:  {2, nil},
-		8:  {0, gil.NotFound{gil.Int(2)}},
+		8:  {0, gil.NotFoundError{gil.Int(2)}},
 		9:  {5, nil},
 		10: {0, gil.RangeError{gil.Int(0)}},
 	}
@@ -41,8 +41,8 @@ func TestBinarySearch(t *testing.T) {
 				if _, ok := err.(gil.RangeError); ok {
 					t.Errorf("Unexpected error, not RangeError")
 				}
-			} else if _, ok := res.Err.(gil.NotFound); !ok {
-				if _, ok := err.(gil.NotFound); ok {
+			} else if _, ok := res.Err.(gil.NotFoundError); !ok {
+				if _, ok := err.(gil.NotFoundError); ok {
 					t.Errorf("Unexpected error, not NotFound")
 				}
 			}

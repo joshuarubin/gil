@@ -6,25 +6,32 @@ import (
 	"github.com/joshuarubin/gil"
 )
 
+var list = gil.CopyToIntSlice([]int{
+	62, 34, 10, 27, 62,
+	24, 11, 99, 71, 71,
+	45, 83, 71, 18, 29,
+	62, 8, 54, 3, 41,
+	91, 42, 1, 74, 7,
+	81, 14, 73, 56, 47,
+	19, 78, 65, 10, 35,
+})
+
 func TestMergeSort(t *testing.T) {
-	list := gil.CopyToIntSlice([]int{
-		62, 34, 10, 27, 62,
-		24, 11, 99, 71, 71,
-		45, 83, 71, 18, 29,
-		62, 8, 54, 3, 41,
-		91, 42, 1, 74, 7,
-		81, 14, 73, 56, 47,
-		19, 78, 65, 10, 35,
-	})
-
-	l := len(list)
-
 	sorted, err := MergeSort(list)
+	testSorted(t, sorted, err)
+}
+
+func TestQuickSort(t *testing.T) {
+	sorted, err := QuickSort(list)
+	testSorted(t, sorted, err)
+}
+
+func testSorted(t *testing.T, sorted []gil.Interface, err error) {
 	if err != nil {
 		t.Fatal("unexpected sort error")
 	}
 
-	if len(sorted) != l {
+	if len(sorted) != len(list) {
 		t.Fatal("list lenght changed")
 	}
 

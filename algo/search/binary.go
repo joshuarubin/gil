@@ -44,5 +44,5 @@ func Binary(list []gil.Interface, val gil.Interface) (int, error) {
 		}
 	}
 
-	return 0, gil.NotFound{val}
+	return 0, gil.NotFoundError{val}
 }
