@@ -37,3 +37,9 @@ type EmptyError string
 func (e EmptyError) Error() string {
 	return string(e)
 }
+
+type ArgumentError string
+
+func (e ArgumentError) Error() string {
+	return string(e)
+}

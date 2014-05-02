@@ -32,7 +32,7 @@ func testSorted(t *testing.T, sorted []gil.Interface, err error) {
 	}
 
 	if len(sorted) != len(list) {
-		t.Fatal("list lenght changed")
+		t.Fatal("list length changed")
 	}
 
 	prev := sorted[0]
