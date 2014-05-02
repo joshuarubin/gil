@@ -34,20 +34,21 @@ func TestBinarySearch(t *testing.T) {
 			if res.Err == nil {
 				Convey(fmt.Sprintf("The position of %d should be %d", val, res.Pos), func() {
 					So(res.Pos, ShouldEqual, pos)
-
-					Convey(fmt.Sprintf("No error should be returned when searching for %d", val), func() {
-						So(err, ShouldBeNil)
-					})
 				})
+
+				Convey(fmt.Sprintf("No error should be returned when searching for %d", val), func() {
+					So(err, ShouldBeNil)
+				})
+
 				continue
 			}
 
 			Convey(fmt.Sprintf("%d should not be found", val), func() {
 				So(err, ShouldNotBeNil)
+			})
 
-				Convey(fmt.Sprintf("Error Type %T should be returned when searching for %d", res.Err, val), func() {
-					So(err, ShouldHaveSameTypeAs, res.Err)
-				})
+			Convey(fmt.Sprintf("Error Type %T should be returned when searching for %d", res.Err, val), func() {
+				So(err, ShouldHaveSameTypeAs, res.Err)
 			})
 		}
 	})
