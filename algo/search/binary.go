@@ -2,6 +2,8 @@ package search
 
 import "github.com/joshuarubin/gil"
 
+// Binary implements a generic binary search. The index of the matching value
+// is returned. If no match is found, NotFoundError is returned.
 func Binary(list []gil.Interface, val gil.Interface) (int, error) {
 	l := len(list)
 

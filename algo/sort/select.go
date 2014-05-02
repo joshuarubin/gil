@@ -2,7 +2,11 @@ package sort
 
 import "github.com/joshuarubin/gil"
 
-// puts the n smallest values at the beginning of list, in order
+// TODO(jrubin) test this
+
+// NSmallest implements a partial selection sort. It modifies, in-place,
+// the passed in list such that the n smallest values are placed at the
+// beginning of the list, in order.
 func NSmallest(list []gil.Interface, n int) error {
 	// modifies list
 	// uses a partial selection sort

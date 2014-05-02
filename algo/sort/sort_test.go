@@ -17,12 +17,14 @@ var list = gil.CopyToIntSlice([]int{
 })
 
 func TestMergeSort(t *testing.T) {
-	sorted, err := MergeSort(list)
+	sorted, err := Merge(list)
 	testSorted(t, sorted, err)
 }
 
 func TestQuickSort(t *testing.T) {
-	sorted, err := QuickSort(list)
+	sorted := make([]gil.Interface, len(list))
+	copy(sorted, list)
+	err := Quick(sorted)
 	testSorted(t, sorted, err)
 }
 

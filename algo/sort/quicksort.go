@@ -2,83 +2,130 @@ package sort
 
 import "github.com/joshuarubin/gil"
 
-func qsPivotIndex(list []gil.Interface) (int, error) {
-	l := len(list)
-
-	if l == 0 {
-		return 0, gil.EmptyError("could not identify pivot of empty list")
-	}
+func qsSetPivot(work *qsWork) error {
+	l := len(work.list)
 
 	// if the list has only 1 or 2 elements, it doesn't matter which index is picked
 	if l < 3 {
-		return l / 2, nil
+		work.pivot = l / 2
+		return nil
 	}
 
 	// choose index of element with the median value of first, middle and last elements
 	mid, last := l/2, l-1
-	shortList := []gil.Interface{list[0], list[mid], list[last]}
+	shortList := []gil.Interface{work.list[0], work.list[mid], work.list[last]}
 	if err := NSmallest(shortList, 2); err != nil {
-		return 0, err
+		return err
 	}
 
 	// median is the larger of the 2 smallest, so the 2nd value (index 1)
 	switch shortList[1] {
-	case list[mid]:
-		return mid, nil
-	case list[last]:
-		return last, nil
+	case work.list[mid]:
+		work.pivot = mid
+	case work.list[last]:
+		work.pivot = last
 	}
 
-	return 0, nil
+	return nil
 }
 
-func QuickSort(list []gil.Interface) ([]gil.Interface, error) {
-	l := len(list)
-	if l < 2 {
-		ret := make([]gil.Interface, l)
-		copy(ret, list)
-		return ret, nil
-	}
+type qsWork struct {
+	list  []gil.Interface
+	pivot int
+}
 
-	iPivot, err := qsPivotIndex(list)
-	valPivot := list[iPivot]
+func (w *qsWork) List() []gil.Interface {
+	return w.list
+}
 
-	if err != nil {
-		return nil, err
-	}
+func (w *qsWork) SetList(list []gil.Interface) {
+	w.list = list
+}
 
-	low, high := make([]gil.Interface, l), make([]gil.Interface, l)
-	j, k := 0, 0
+func qsPartition(work *qsWork) (int, error) {
+	valPivot := work.list[work.pivot]
 
-	for i, val := range list {
-		if i == iPivot {
-			continue
-		}
+	last := len(work.list) - 1
 
+	// swap pivot and last values
+	work.list[work.pivot], work.list[last] = work.list[last], work.list[work.pivot]
+
+	store := 0
+	for i, val := range work.list {
 		if less, err := val.Less(valPivot); err != nil {
-			return nil, err
+			return 0, err
 		} else if less {
-			low[j] = val
-			j++
-		} else {
-			high[k] = val
-			k++
+			// swap list[i] and list[store]
+			work.list[i], work.list[store] = work.list[store], work.list[i]
+			store++
 		}
 	}
 
-	lowSorted, err := QuickSort(low[:j])
-	if err != nil {
-		return nil, err
+	// swap list[store] and list[right]
+	// move pivot into its final place
+	work.list[store], work.list[last] = work.list[last], work.list[store]
+
+	return store, nil
+}
+
+func qs(workCh <-chan sortWork, resultCh chan<- error) {
+	work, ok := (<-workCh).(*qsWork)
+	if !ok {
+		resultCh <- gil.TypeAssertionError{}
+		return
 	}
 
-	highSorted, err := QuickSort(high[:k])
-	if err != nil {
-		return nil, err
+	if isShortList(work, false) {
+		resultCh <- nil
+		return
 	}
 
-	copy(low, lowSorted)
-	low[j] = valPivot
-	copy(low[j+1:], highSorted)
+	// choose pivot index
+	if err := qsSetPivot(work); err != nil {
+		resultCh <- err
+		return
+	}
 
-	return low, nil
+	// do in-place less/greater partitioning
+	pivotNew, err := qsPartition(work)
+	if err != nil {
+		resultCh <- err
+		return
+	}
+
+	goWorkCh, goResultCh := make(chan sortWork), make(chan error)
+
+	parts := [][]gil.Interface{
+		work.list[:pivotNew],
+		work.list[pivotNew+1:],
+	}
+
+	// sort each partition in its own goroutine
+	for _, part := range parts {
+		go qs(goWorkCh, goResultCh)
+		goWorkCh <- &qsWork{list: part}
+	}
+
+	// wait for results
+	for _ = range parts {
+		if err := <-goResultCh; err != nil {
+			resultCh <- err
+			return
+		}
+	}
+
+	// and we're done
+	resultCh <- nil
+}
+
+// Quick implements a generic, in-place, concurrent sort utilizing the
+// quick sort algorithm. Pivot points are chosen as the index of the median
+// value of the first, middle and last elements.
+func Quick(list []gil.Interface) error {
+	workCh, resultCh := make(chan sortWork), make(chan error)
+
+	go qs(workCh, resultCh)
+	workCh <- &qsWork{list: list}
+
+	return <-resultCh
 }

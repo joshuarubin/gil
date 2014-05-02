@@ -2,32 +2,32 @@ package sort
 
 import "github.com/joshuarubin/gil"
 
-type mergeSortData struct {
+type msData struct {
 	pos  int
 	list []gil.Interface
 }
 
-func (m *mergeSortData) Peek() gil.Interface {
+func (m *msData) Peek() gil.Interface {
 	return m.list[m.pos]
 }
 
-func (m *mergeSortData) Pop() gil.Interface {
+func (m *msData) Pop() gil.Interface {
 	ret := m.Peek()
 	m.pos++
 	return ret
 }
 
-func mergeSortInterleave(parts ...[]gil.Interface) ([]gil.Interface, error) {
+func msInterleave(parts ...[]gil.Interface) ([]gil.Interface, error) {
 	const NUM = 2
 
 	if len(parts) != NUM {
 		return nil, gil.ArgumentError("wrong number of parts")
 	}
 
-	data := [NUM]*mergeSortData{}
+	data := [NUM]*msData{}
 	tlen := 0
 	for side, part := range parts {
-		data[side] = &mergeSortData{list: part}
+		data[side] = &msData{list: part}
 		tlen += len(part)
 	}
 
@@ -43,7 +43,7 @@ func mergeSortInterleave(parts ...[]gil.Interface) ([]gil.Interface, error) {
 
 		if rem == 3 { // 0b11
 			// elements remain on both sides
-			var min *mergeSortData
+			var min *msData
 			for _, d := range data {
 				if min == nil {
 					min = d
@@ -73,21 +73,45 @@ func mergeSortInterleave(parts ...[]gil.Interface) ([]gil.Interface, error) {
 	return ret, nil
 }
 
-type mergeSortWork struct {
+type msWork struct {
 	list []gil.Interface
 	side int
+	err  error
 }
 
-type mergeSortResult struct {
-	mergeSortWork
-	err error
+func (w *msWork) List() []gil.Interface {
+	return w.list
 }
 
-func mergeSortConcurrent(workCh <-chan mergeSortWork, resultCh chan<- mergeSortResult) {
-	work := <-workCh
+func (w *msWork) SetList(list []gil.Interface) {
+	w.list = list
+}
 
-	if len(work.list) < 2 {
-		resultCh <- mergeSortResult{work, nil}
+func isShortList(work sortWork, copyList bool) bool {
+	l := len(work.List())
+
+	if l >= 2 {
+		return false
+	}
+
+	if copyList {
+		ret := make([]gil.Interface, l)
+		copy(ret, work.List())
+		work.SetList(ret)
+	}
+
+	return true
+}
+
+func ms(workCh <-chan sortWork, resultCh chan<- sortWork) {
+	work, ok := (<-workCh).(*msWork)
+	if !ok {
+		resultCh <- &msWork{err: gil.TypeAssertionError{}}
+		return
+	}
+
+	if isShortList(work, true) {
+		resultCh <- work
 		return
 	}
 
@@ -97,35 +121,49 @@ func mergeSortConcurrent(workCh <-chan mergeSortWork, resultCh chan<- mergeSortR
 		work.list[half:],
 	}
 
-	goWorkCh, goResultCh := make(chan mergeSortWork), make(chan mergeSortResult)
+	goWorkCh, goResultCh := make(chan sortWork), make(chan sortWork)
 
 	for side, part := range parts {
-		go mergeSortConcurrent(goWorkCh, goResultCh)
-		goWorkCh <- mergeSortWork{part, side}
+		go ms(goWorkCh, goResultCh)
+		goWorkCh <- &msWork{part, side, nil}
 	}
 
 	for _ = range parts {
-		result := <-goResultCh
+		result, ok := (<-goResultCh).(*msWork)
+
+		if !ok {
+			resultCh <- &msWork{err: gil.TypeAssertionError{}}
+			return
+		}
 
 		if result.err != nil {
-			resultCh <- mergeSortResult{err: result.err}
+			resultCh <- result
 			return
 		}
 
 		parts[result.side] = result.list
 	}
 
-	if result, err := mergeSortInterleave(parts[0], parts[1]); err != nil {
-		resultCh <- mergeSortResult{err: err}
+	if result, err := msInterleave(parts[0], parts[1]); err != nil {
+		resultCh <- &msWork{err: err}
 	} else {
-		resultCh <- mergeSortResult{mergeSortWork{result, work.side}, nil}
+		resultCh <- &msWork{result, work.side, nil}
 	}
 }
 
-func MergeSort(list []gil.Interface) ([]gil.Interface, error) {
-	workCh, resultCh := make(chan mergeSortWork), make(chan mergeSortResult)
-	go mergeSortConcurrent(workCh, resultCh)
-	workCh <- mergeSortWork{list: list}
-	result := <-resultCh
+// Merge implements a generic, concurrent sort utilizing the merge sort
+// algorithm. The input list is left unmodified and a sorted version is
+// returned.
+func Merge(list []gil.Interface) ([]gil.Interface, error) {
+	workCh, resultCh := make(chan sortWork), make(chan sortWork)
+
+	go ms(workCh, resultCh)
+	workCh <- &msWork{list: list}
+
+	result, ok := (<-resultCh).(*msWork)
+	if !ok {
+		return nil, gil.TypeAssertionError{}
+	}
+
 	return result.list, result.err
 }
