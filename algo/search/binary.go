@@ -20,7 +20,7 @@ func Binary(list []gil.Interface, val gil.Interface) (int, error) {
 	}
 
 	if valLess || testLess {
-		return 0, gil.RangeError{val}
+		return 0, gil.RangeError{Interface: val}
 	}
 
 	var start, stop int = 0, l - 1
@@ -46,5 +46,5 @@ func Binary(list []gil.Interface, val gil.Interface) (int, error) {
 		}
 	}
 
-	return 0, gil.NotFoundError{val}
+	return 0, gil.NotFoundError{Interface: val}
 }
