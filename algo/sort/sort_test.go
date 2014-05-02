@@ -2,6 +2,7 @@ package sort
 
 import (
 	"fmt"
+	"math/rand"
 	"testing"
 
 	"github.com/joshuarubin/gil"
@@ -88,4 +89,40 @@ func testSorted(t *testing.T, algo string, size int, list, sorted []gil.Interfac
 			}
 		})
 	})
+}
+
+func benchmarkList(size int) []gil.Interface {
+	list := make([]gil.Interface, size)
+	for i := 0; i < size; i++ {
+		list[i] = gil.Int(rand.Int())
+	}
+	return list
+}
+
+func BenchmarkMergeSort(b *testing.B) {
+	list := benchmarkList(2 ^ 14)
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		copyOfList := make([]gil.Interface, len(list))
+		copy(copyOfList, list)
+		b.StartTimer()
+
+		Merge(copyOfList)
+	}
+}
+
+func BenchmarkQuickSort(b *testing.B) {
+	list := benchmarkList(2 ^ 14)
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		copyOfList := make([]gil.Interface, len(list))
+		copy(copyOfList, list)
+		b.StartTimer()
+
+		Quick(copyOfList)
+	}
 }
