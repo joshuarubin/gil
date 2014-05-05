@@ -3,20 +3,58 @@ package containers
 import (
 	"fmt"
 	"strings"
-
-	"github.com/joshuarubin/gil"
 )
 
 // LinkedListNode is a node in a linked list
 type LinkedListNode struct {
-	Value gil.Interface
+	Value interface{}
 	Next  *LinkedListNode
+}
+
+// InsertNext inserts item after the current node.
+// Returns a pointer to the node that was just inserted.
+func (node *LinkedListNode) InsertNext(item interface{}) *LinkedListNode {
+	newNode := &LinkedListNode{
+		Value: item,
+		Next:  node.Next,
+	}
+	node.Next = newNode
+	return newNode
+}
+
+// RemoveNext removes the node after the current node.
+// Returns a pointer to the current node.
+func (node *LinkedListNode) RemoveNext() *LinkedListNode {
+	if node.Next != nil {
+		node.Next = node.Next.Next
+	}
+	return node
 }
 
 // LinkedList is an object that contains the Head pointer of a linked list
 // as well as methods that apply to the whole list
 type LinkedList struct {
 	Head *LinkedListNode
+}
+
+// Push inserts item at the beginning of the linked list
+func (l *LinkedList) Push(item interface{}) *LinkedList {
+	l.Head = &LinkedListNode{
+		Value: item,
+		Next:  l.Head,
+	}
+	return l
+}
+
+// Pop removes and returns the item at the beginning of the linked list
+func (l *LinkedList) Pop() interface{} {
+	node := l.Head
+	if node == nil {
+		return nil
+	}
+
+	l.Head = node.Next
+	return node.Value
 }
 
 // Reverse reverses the linked list beginning at Head
@@ -39,12 +77,7 @@ func (l *LinkedList) String() string {
 	ret := ""
 
 	l.Walk(func(node *LinkedListNode, _ int) bool {
-		if node.Value != nil {
-			ret = fmt.Sprintf("%s %s", ret, node.Value.String())
-		} else if node.Next != nil {
-			ret = fmt.Sprintf("%s nil", ret)
-		}
-
+		ret = fmt.Sprintf("%s %v", ret, node.Value)
 		return true
 	})
 

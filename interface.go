@@ -5,3 +5,11 @@ type Interface interface {
 	String() string // implement fmt.Stringer
 	Less(iface Interface) (bool, error)
 }
+
+// Queue is a generic queue interface implemented by some types in gil/containers
+type Queue interface {
+	Len() int
+	Push(item interface{}) Queue
+	Pop() interface{}
+	Peek() interface{}
+}
