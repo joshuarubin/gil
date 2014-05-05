@@ -52,4 +52,41 @@ func TestBinarySearch(t *testing.T) {
 			})
 		}
 	})
+
+	Convey("Given a non-homogenous list", t, func() {
+		Convey("Range checks should fail", func() {
+			list := []gil.Interface{
+				gil.Int(0),
+				gil.String("a"),
+			}
+
+			pos, err := Binary(list, gil.String("z"))
+
+			So(pos, ShouldEqual, 0)
+			So(err, ShouldHaveSameTypeAs, gil.TypeMismatchError{})
+
+			pos, err = Binary(list, gil.Int(4))
+
+			So(pos, ShouldEqual, 0)
+			So(err, ShouldHaveSameTypeAs, gil.TypeMismatchError{})
+		})
+
+		Convey("Comparison checks should fail", func() {
+			list := []gil.Interface{
+				gil.Int(0),
+				gil.String("a"),
+				gil.Int(9),
+			}
+
+			pos, err := Binary(list, gil.String("z"))
+
+			So(pos, ShouldEqual, 0)
+			So(err, ShouldHaveSameTypeAs, gil.TypeMismatchError{})
+
+			pos, err = Binary(list, gil.Int(4))
+
+			So(pos, ShouldEqual, 0)
+			So(err, ShouldHaveSameTypeAs, gil.TypeMismatchError{})
+		})
+	})
 }

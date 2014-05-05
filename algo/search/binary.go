@@ -10,13 +10,13 @@ func Binary(list []gil.Interface, val gil.Interface) (int, error) {
 	valLess, err := val.Less(list[0])
 
 	if err != nil {
-		return 0, nil
+		return 0, err
 	}
 
 	testLess, err := list[l-1].Less(val)
 
 	if err != nil {
-		return 0, nil
+		return 0, err
 	}
 
 	if valLess || testLess {
