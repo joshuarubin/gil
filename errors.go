@@ -8,8 +8,8 @@ type RangeError struct {
 	Interface
 }
 
-func (e RangeError) Error() string {
-	return e.String() + " not in range"
+func (RangeError) Error() string {
+	return "not in range"
 }
 
 // NotFoundError is returned when a search value is not found within a set
@@ -17,8 +17,8 @@ type NotFoundError struct {
 	Interface
 }
 
-func (e NotFoundError) Error() string {
-	return e.String() + " not found"
+func (NotFoundError) Error() string {
+	return "not found"
 }
 
 // TypeAssertionError is returned when an internal type assertion failed.
@@ -37,7 +37,7 @@ type TypeMismatchError struct {
 }
 
 func (e TypeMismatchError) Error() string {
-	return fmt.Sprintf("type mismatch %s(%T):%s(%T)", e.lhs.String(), e.lhs, e.rhs.String(), e.rhs)
+	return fmt.Sprintf("type mismatch (%T):(%T)", e.lhs, e.rhs)
 }
 
 // ArgumentError is returned when an invalid argument or number of arguments
