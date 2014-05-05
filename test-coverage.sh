@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "mode: set" > acc.out
-for Dir in $(find ./* -maxdepth 10 -type d ); do
+for Dir in $(find . -type d ); do
   if ls $Dir/*.go &> /dev/null; then
     returnval=`go test -coverprofile=profile.out $Dir`
     echo ${returnval}
