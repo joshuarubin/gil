@@ -1,47 +1,51 @@
 package containers
 
 import (
+	"container/list"
+
 	"github.com/joshuarubin/gil"
 )
 
 // Stack is a generic LIFO implementation
 type Stack struct {
-	list   *LinkedList
-	length int
+	list *list.List
 }
 
 // Len returns the number of items in the stack
 func (s *Stack) Len() int {
-	return s.length
+	if s.list == nil {
+		return 0
+	}
+
+	return s.list.Len()
 }
 
 // Push an item at the front of the linked list
 func (s *Stack) Push(item interface{}) gil.Queue {
-	s.length++
-
 	if s.list == nil {
-		s.list = &LinkedList{}
+		s.list = list.New()
 	}
 
-	s.list.Push(item)
+	s.list.PushBack(item)
 	return s
 }
 
 // Pop an item off the front of the linked list
 func (s *Stack) Pop() interface{} {
-	if s.length == 0 {
+	if s.list == nil || s.list.Len() == 0 {
 		return nil
 	}
 
-	s.length--
-	return s.list.Pop()
+	ret := s.list.Back()
+	s.list.Remove(ret)
+	return ret.Value
 }
 
 // Peek at the item at the front of the stack without removing it
 func (s *Stack) Peek() interface{} {
-	if s.length == 0 {
+	if s.list == nil || s.list.Len() == 0 {
 		return nil
 	}
 
-	return s.list.Head.Value
+	return s.list.Back().Value
 }
