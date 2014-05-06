@@ -1,7 +1,5 @@
 package gil
 
-import "fmt"
-
 // RangeError is returned when a search value lies outside the range of
 // the set of possibilities
 type RangeError struct {
@@ -28,16 +26,6 @@ type TypeAssertionError struct{}
 
 func (e TypeAssertionError) Error() string {
 	return "type assertion error"
-}
-
-// TypeMismatchError is returned when trying to compare two values with
-// different types
-type TypeMismatchError struct {
-	lhs, rhs Interface
-}
-
-func (e TypeMismatchError) Error() string {
-	return fmt.Sprintf("type mismatch (%T):(%T)", e.lhs, e.rhs)
 }
 
 // ArgumentError is returned when an invalid argument or number of arguments
