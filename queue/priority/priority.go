@@ -7,35 +7,21 @@ import (
 )
 
 // A pqHeap implements heap.Interface and holds priorityQueueItems.
-type pqHeap gil.Slice
-
-// required for heap.Interface
-func (pq pqHeap) Len() int {
-	return len(pq)
-}
-
-// required for heap.Interface
-func (pq pqHeap) Less(i, j int) bool {
-	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
-	return pq[i].Less(pq[j])
-}
-
-// required for heap.Interface
-func (pq pqHeap) Swap(i, j int) {
-	pq[i], pq[j] = pq[j], pq[i]
+type pqHeap struct {
+	gil.Slice
 }
 
 // required for heap.Interface
 func (pq *pqHeap) Push(x interface{}) {
-	*pq = append(*pq, x.(gil.Interface))
+	pq.Slice = append(pq.Slice, x.(gil.Interface))
 }
 
 // required for heap.Interface
 func (pq *pqHeap) Pop() interface{} {
-	old := *pq
-	n := len(old)
+	old := pq.Slice
+	n := pq.Len()
 	item := old[n-1]
-	*pq = old[0 : n-1]
+	pq.Slice = old[:n-1]
 	return item
 }
 
@@ -72,5 +58,5 @@ func (q *PriorityQueue) Len() int {
 
 // Peek at the next item in the queue without removing it
 func (q *PriorityQueue) Peek() gil.Interface {
-	return (*q.heap)[0]
+	return (*q.heap).Slice[0]
 }

@@ -2,7 +2,9 @@ package gil
 
 import (
 	"fmt"
+	"math/rand"
 	"testing"
+	"time"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -61,46 +63,43 @@ func TestString(t *testing.T) {
 }
 
 type Result struct {
-	Pos int
-	Err error
+	Pos   int
+	Found bool
 }
 
 func TestFind(t *testing.T) {
 	slice := CopyToIntSlice([]int{1, 3, 5, 6, 7, 9})
 	expect := map[Int]Result{
-		0:  {Pos: 0, Err: NotFoundError{Interface: Int(0)}},
-		1:  {Pos: 0, Err: nil},
-		2:  {Pos: 1, Err: NotFoundError{Interface: Int(2)}},
-		3:  {Pos: 1, Err: nil},
-		5:  {Pos: 2, Err: nil},
-		8:  {Pos: 5, Err: NotFoundError{Interface: Int(8)}},
-		9:  {Pos: 5, Err: nil},
-		10: {Pos: 6, Err: NotFoundError{Interface: Int(10)}},
+		0:  {Pos: 0, Found: false},
+		1:  {Pos: 0, Found: true},
+		2:  {Pos: 1, Found: false},
+		3:  {Pos: 1, Found: true},
+		5:  {Pos: 2, Found: true},
+		8:  {Pos: 5, Found: false},
+		9:  {Pos: 5, Found: true},
+		10: {Pos: 6, Found: false},
 	}
 
 	Convey("Given this slice", t, func() {
 		for v, r := range expect {
 			val, res := v, r // make variables local to this loop only
-			pos, err := slice.Find(val)
+			pos := slice.Find(val)
 
-			if res.Err == nil {
+			if res.Found == true {
 				Convey(fmt.Sprintf("The position of %d should be %d", val, res.Pos), func() {
 					So(pos, ShouldEqual, res.Pos)
 				})
 
 				Convey(fmt.Sprintf("No error should be returned when searching for %d", val), func() {
-					So(err, ShouldBeNil)
+					So(pos, ShouldBeLessThan, len(slice))
+					So(slice[pos], ShouldEqual, val)
 				})
 
 				continue
 			}
 
 			Convey(fmt.Sprintf("%d should not be found", val), func() {
-				So(err, ShouldNotBeNil)
-			})
-
-			Convey(fmt.Sprintf("Error Type %T should be returned when searching for %d", res.Err, val), func() {
-				So(err, ShouldHaveSameTypeAs, res.Err)
+				So(pos == len(slice) || slice[pos] != val, ShouldBeTrue)
 			})
 		}
 	})
@@ -112,15 +111,11 @@ func TestFind(t *testing.T) {
 				String("a"),
 			}
 
-			pos, err := slice.Find(String("z"))
-
+			pos := slice.Find(String("z"))
 			So(pos, ShouldEqual, 2)
-			So(err, ShouldHaveSameTypeAs, NotFoundError{})
 
-			pos, err = slice.Find(Int(4))
-
+			pos = slice.Find(Int(4))
 			So(pos, ShouldEqual, 2)
-			So(err, ShouldHaveSameTypeAs, NotFoundError{})
 		})
 
 		Convey("Comparison checks should fail", func() {
@@ -130,16 +125,88 @@ func TestFind(t *testing.T) {
 				Int(9),
 			}
 
-			pos, err := slice.Find(String("z"))
-
+			pos := slice.Find(String("z"))
 			So(pos, ShouldEqual, 3)
-			So(err, ShouldHaveSameTypeAs, NotFoundError{})
 
-			pos, err = slice.Find(Int(4))
-
+			pos = slice.Find(Int(4))
 			So(pos, ShouldEqual, 2)
-			So(err, ShouldHaveSameTypeAs, NotFoundError{})
+			So(slice[pos], ShouldNotEqual, 4)
 		})
 	})
+}
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+func testSorted(t *testing.T, slice, sorted Slice) {
+	Convey(fmt.Sprintf("For sorting a random int slice (size %d)", len(slice)), t, func() {
+		Convey("The length should not change", func() {
+			So(len(sorted), ShouldEqual, len(slice))
+		})
+
+		if len(slice) > 0 {
+			Convey("The values should be in order", func() {
+				prev := sorted[0]
+				for _, val := range sorted[1:] {
+					So(val.Less(prev), ShouldBeFalse)
+					prev = val
+				}
+			})
+		}
+
+		Convey("No values should be missing", func() {
+			for _, val := range slice {
+				So(sorted, ShouldContain, val)
+			}
+		})
+
+		Convey("No values should be added", func() {
+			for _, val := range sorted {
+				So(slice, ShouldContain, val)
+			}
+		})
+	})
+}
+
+func genSlice(size int) Slice {
+	slice := make(Slice, size)
+
+	for i := 0; i < size; i++ {
+		slice[i] = Int(rand.Int())
+	}
+
+	return slice
+}
+
+func benchmarkSlice(size int) Slice {
+	slice := make(Slice, size)
+	for i := 0; i < size; i++ {
+		slice[i] = Int(rand.Int())
+	}
+	return slice
+}
+
+func BenchmarkSort(b *testing.B) {
+	slice := benchmarkSlice(2 ^ 14)
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		copyOfSlice := make(Slice, len(slice))
+		copy(copyOfSlice, slice)
+		b.StartTimer()
+
+		copyOfSlice.Sort()
+	}
+}
+
+func TestSort(t *testing.T) {
+	for _, size := range []int{0, 1, 2, 3, 10, 100} {
+		slice := genSlice(size)
+		sorted := make(Slice, size)
+		copy(sorted, slice)
+		sorted.Sort()
+		testSorted(t, slice, sorted)
+	}
 }

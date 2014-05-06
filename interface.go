@@ -9,19 +9,33 @@ type Interface interface {
 
 type Slice []Interface
 
-func (s Slice) Find(val Interface) (int, error) {
+func (s Slice) Find(val Interface) int {
 	l := len(s)
 
-	pos := sort.Search(l, func(i int) bool {
+	return sort.Search(l, func(i int) bool {
 		test := s[i]
 		return (val == test) || val.Less(s[i])
 	})
+}
 
-	if pos < l && s[pos] == val {
-		return pos, nil
-	}
+// required for sort.Interface
+func (s Slice) Len() int {
+	return len(s)
+}
 
-	return pos, NotFoundError{Interface: val}
+// required for sort.Interface
+func (s Slice) Less(i, j int) bool {
+	return s[i].Less(s[j])
+}
+
+// required for sort.Interface
+func (s Slice) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+// Sort the slice
+func (s Slice) Sort() {
+	sort.Sort(s)
 }
 
 // Queue is a generic queue interface implemented by some types in gil/containers
