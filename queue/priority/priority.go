@@ -1,4 +1,4 @@
-package containers
+package priority
 
 import (
 	"container/heap"
@@ -45,8 +45,8 @@ type PriorityQueue struct {
 	heap *pqHeap
 }
 
-// NewPriorityQueue creates and initializes a PriorityQueue
-func NewPriorityQueue() *PriorityQueue {
+// New creates and initializes a PriorityQueue
+func New() *PriorityQueue {
 	q := &PriorityQueue{
 		heap: &pqHeap{},
 	}

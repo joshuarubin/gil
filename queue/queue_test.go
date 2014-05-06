@@ -1,10 +1,8 @@
-package containers
+package queue
 
 import (
 	"fmt"
-	"math/rand"
 	"testing"
-	"time"
 
 	"github.com/joshuarubin/gil"
 	. "github.com/smartystreets/goconvey/convey"
@@ -51,30 +49,6 @@ func TestQueue(t *testing.T) {
 			So(q.Len(), ShouldEqual, NUM-i)
 			So(q.Pop(), ShouldEqual, i)
 			So(q.Len(), ShouldEqual, NUM-1-i)
-		}
-	})
-}
-
-func TestPriorityQueue(t *testing.T) {
-	q := NewPriorityQueue()
-
-	rand.Seed(time.Now().UnixNano())
-
-	for i := 0; i < NUM; i++ {
-		q.Push(gil.Int(rand.Int()))
-	}
-
-	prev := q.Peek()
-
-	Convey("PriorityQueue should implement a priority queue", t, func() {
-		for i := 0; i < NUM; i++ {
-			So(q.Len(), ShouldEqual, NUM-i)
-
-			cur := q.Pop()
-			So(q.Len(), ShouldEqual, NUM-i-1)
-			So(prev.Less(cur) || cur == prev, ShouldBeTrue)
-
-			prev = cur
 		}
 	})
 }
