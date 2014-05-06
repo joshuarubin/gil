@@ -3,12 +3,12 @@ package sort
 import "github.com/joshuarubin/gil"
 
 type msData struct {
-	pos  int
-	list []gil.Interface
+	pos   int
+	slice gil.Slice
 }
 
 func (m *msData) Peek() gil.Interface {
-	return m.list[m.pos]
+	return m.slice[m.pos]
 }
 
 func (m *msData) Pop() gil.Interface {
@@ -17,7 +17,7 @@ func (m *msData) Pop() gil.Interface {
 	return ret
 }
 
-func msInterleave(parts ...[]gil.Interface) ([]gil.Interface, error) {
+func msInterleave(parts ...gil.Slice) (gil.Slice, error) {
 	const NUM = 2
 
 	if len(parts) != NUM {
@@ -27,16 +27,16 @@ func msInterleave(parts ...[]gil.Interface) ([]gil.Interface, error) {
 	data := [NUM]*msData{}
 	tlen := 0
 	for side, part := range parts {
-		data[side] = &msData{list: part}
+		data[side] = &msData{slice: part}
 		tlen += len(part)
 	}
 
-	ret := make([]gil.Interface, tlen)
+	ret := make(gil.Slice, tlen)
 
 	for k := 0; k < tlen; k++ {
 		rem := 0
 		for side, d := range data {
-			if d.pos < len(d.list) {
+			if d.pos < len(d.slice) {
 				rem |= 1 << uint(side)
 			}
 		}
@@ -72,30 +72,30 @@ func msInterleave(parts ...[]gil.Interface) ([]gil.Interface, error) {
 }
 
 type msWork struct {
-	list []gil.Interface
-	side int
-	err  error
+	slice gil.Slice
+	side  int
+	err   error
 }
 
-func (w *msWork) List() []gil.Interface {
-	return w.list
+func (w *msWork) Slice() gil.Slice {
+	return w.slice
 }
 
-func (w *msWork) SetList(list []gil.Interface) {
-	w.list = list
+func (w *msWork) SetSlice(slice gil.Slice) {
+	w.slice = slice
 }
 
-func isShortList(work sortWork, copyList bool) bool {
-	l := len(work.List())
+func isShortSlice(work sortWork, copySlice bool) bool {
+	l := len(work.Slice())
 
 	if l >= 2 {
 		return false
 	}
 
-	if copyList {
-		ret := make([]gil.Interface, l)
-		copy(ret, work.List())
-		work.SetList(ret)
+	if copySlice {
+		ret := make(gil.Slice, l)
+		copy(ret, work.Slice())
+		work.SetSlice(ret)
 	}
 
 	return true
@@ -108,15 +108,15 @@ func ms(workCh <-chan sortWork, resultCh chan<- sortWork) {
 		return
 	}
 
-	if isShortList(work, true) {
+	if isShortSlice(work, true) {
 		resultCh <- work
 		return
 	}
 
-	half := len(work.list) / 2
-	parts := [][]gil.Interface{
-		work.list[:half],
-		work.list[half:],
+	half := len(work.slice) / 2
+	parts := []gil.Slice{
+		work.slice[:half],
+		work.slice[half:],
 	}
 
 	goWorkCh, goResultCh := make(chan sortWork), make(chan sortWork)
@@ -139,7 +139,7 @@ func ms(workCh <-chan sortWork, resultCh chan<- sortWork) {
 			return
 		}
 
-		parts[result.side] = result.list
+		parts[result.side] = result.slice
 	}
 
 	if result, err := msInterleave(parts[0], parts[1]); err != nil {
@@ -150,18 +150,18 @@ func ms(workCh <-chan sortWork, resultCh chan<- sortWork) {
 }
 
 // Merge implements a generic, concurrent sort utilizing the merge sort
-// algorithm. The input list is left unmodified and a sorted version is
+// algorithm. The input slice is left unmodified and a sorted version is
 // returned.
-func Merge(list []gil.Interface) ([]gil.Interface, error) {
+func Merge(slice gil.Slice) (gil.Slice, error) {
 	workCh, resultCh := make(chan sortWork), make(chan sortWork)
 
 	go ms(workCh, resultCh)
-	workCh <- &msWork{list: list}
+	workCh <- &msWork{slice: slice}
 
 	result, ok := (<-resultCh).(*msWork)
 	if !ok {
 		return nil, gil.TypeAssertionError{}
 	}
 
-	return result.list, result.err
+	return result.slice, result.err
 }

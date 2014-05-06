@@ -14,8 +14,8 @@ func (i String) Less(iface Interface) bool {
 }
 
 // CopyToStringSlice takes a slice of ints and returns a slice of Interfaces.
-func CopyToStringSlice(data []string) []Interface {
-	ret := make([]Interface, len(data))
+func CopyToStringSlice(data []string) Slice {
+	ret := make(Slice, len(data))
 	for i, val := range data {
 		ret[i] = String(val)
 	}

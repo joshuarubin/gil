@@ -1,15 +1,5 @@
 package gil
 
-// RangeError is returned when a search value lies outside the range of
-// the set of possibilities
-type RangeError struct {
-	Interface
-}
-
-func (RangeError) Error() string {
-	return "not in range"
-}
-
 // NotFoundError is returned when a search value is not found within a set
 type NotFoundError struct {
 	Interface

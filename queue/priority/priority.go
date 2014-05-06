@@ -7,7 +7,7 @@ import (
 )
 
 // A pqHeap implements heap.Interface and holds priorityQueueItems.
-type pqHeap []gil.Interface
+type pqHeap gil.Slice
 
 // required for heap.Interface
 func (pq pqHeap) Len() int {

@@ -3,9 +3,9 @@ package sort
 import "github.com/joshuarubin/gil"
 
 func qsSetPivot(work *qsWork) error {
-	l := len(work.list)
+	l := len(work.slice)
 
-	// if the list has only 1 or 2 elements, it doesn't matter which index is picked
+	// if the slice has only 1 or 2 elements, it doesn't matter which index is picked
 	if l < 3 {
 		work.pivot = l / 2
 		return nil
@@ -13,16 +13,16 @@ func qsSetPivot(work *qsWork) error {
 
 	// choose index of element with the median value of first, middle and last elements
 	mid, last := l/2, l-1
-	shortList := []gil.Interface{work.list[0], work.list[mid], work.list[last]}
-	if err := NSmallest(shortList, 2); err != nil {
+	shortSlice := gil.Slice{work.slice[0], work.slice[mid], work.slice[last]}
+	if err := NSmallest(shortSlice, 2); err != nil {
 		return err
 	}
 
 	// median is the larger of the 2 smallest, so the 2nd value (index 1)
-	switch shortList[1] {
-	case work.list[mid]:
+	switch shortSlice[1] {
+	case work.slice[mid]:
 		work.pivot = mid
-	case work.list[last]:
+	case work.slice[last]:
 		work.pivot = last
 	}
 
@@ -30,38 +30,38 @@ func qsSetPivot(work *qsWork) error {
 }
 
 type qsWork struct {
-	list  []gil.Interface
+	slice gil.Slice
 	pivot int
 }
 
-func (w *qsWork) List() []gil.Interface {
-	return w.list
+func (w *qsWork) Slice() gil.Slice {
+	return w.slice
 }
 
-func (w *qsWork) SetList(list []gil.Interface) {
-	w.list = list
+func (w *qsWork) SetSlice(slice gil.Slice) {
+	w.slice = slice
 }
 
 func qsPartition(work *qsWork) (int, error) {
-	valPivot := work.list[work.pivot]
+	valPivot := work.slice[work.pivot]
 
-	last := len(work.list) - 1
+	last := len(work.slice) - 1
 
 	// swap pivot and last values
-	work.list[work.pivot], work.list[last] = work.list[last], work.list[work.pivot]
+	work.slice[work.pivot], work.slice[last] = work.slice[last], work.slice[work.pivot]
 
 	store := 0
-	for i, val := range work.list {
+	for i, val := range work.slice {
 		if val.Less(valPivot) {
-			// swap list[i] and list[store]
-			work.list[i], work.list[store] = work.list[store], work.list[i]
+			// swap slice[i] and slice[store]
+			work.slice[i], work.slice[store] = work.slice[store], work.slice[i]
 			store++
 		}
 	}
 
-	// swap list[store] and list[right]
+	// swap slice[store] and slice[right]
 	// move pivot into its final place
-	work.list[store], work.list[last] = work.list[last], work.list[store]
+	work.slice[store], work.slice[last] = work.slice[last], work.slice[store]
 
 	return store, nil
 }
@@ -73,7 +73,7 @@ func qs(workCh <-chan sortWork, resultCh chan<- error) {
 		return
 	}
 
-	if isShortList(work, false) {
+	if isShortSlice(work, false) {
 		resultCh <- nil
 		return
 	}
@@ -93,15 +93,15 @@ func qs(workCh <-chan sortWork, resultCh chan<- error) {
 
 	goWorkCh, goResultCh := make(chan sortWork), make(chan error)
 
-	parts := [][]gil.Interface{
-		work.list[:pivotNew],
-		work.list[pivotNew+1:],
+	parts := []gil.Slice{
+		work.slice[:pivotNew],
+		work.slice[pivotNew+1:],
 	}
 
 	// sort each partition in its own goroutine
 	for _, part := range parts {
 		go qs(goWorkCh, goResultCh)
-		goWorkCh <- &qsWork{list: part}
+		goWorkCh <- &qsWork{slice: part}
 	}
 
 	// wait for results
@@ -119,11 +119,11 @@ func qs(workCh <-chan sortWork, resultCh chan<- error) {
 // Quick implements a generic, in-place, concurrent sort utilizing the
 // quick sort algorithm. Pivot points are chosen as the index of the median
 // value of the first, middle and last elements.
-func Quick(list []gil.Interface) error {
+func Quick(slice gil.Slice) error {
 	workCh, resultCh := make(chan sortWork), make(chan error)
 
 	go qs(workCh, resultCh)
-	workCh <- &qsWork{list: list}
+	workCh <- &qsWork{slice: slice}
 
 	return <-resultCh
 }

@@ -9,12 +9,12 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func genList(size int) []gil.Interface {
+func genSlice(size int) gil.Slice {
 	if size < 0 {
 		return nil
 	}
 
-	list := gil.CopyToIntSlice([]int{
+	slice := gil.CopyToIntSlice([]int{
 		62, 34, 10, 27, 62,
 		24, 11, 99, 71, 71,
 		45, 83, 71, 18, 29,
@@ -24,43 +24,43 @@ func genList(size int) []gil.Interface {
 		19, 78, 65, 10, 35,
 	})
 
-	if size <= len(list) {
-		return list[:size]
+	if size <= len(slice) {
+		return slice[:size]
 	}
 
-	return list
+	return slice
 }
 
 func TestMergeSort(t *testing.T) {
 	for _, size := range []int{-1, 0, 1, 2, 3, 10, 100} {
-		list := genList(size)
-		sorted, err := Merge(list)
-		testSorted(t, "Merge", size, list, sorted, err)
+		slice := genSlice(size)
+		sorted, err := Merge(slice)
+		testSorted(t, "Merge", size, slice, sorted, err)
 	}
 }
 
 func TestQuickSort(t *testing.T) {
 	for _, size := range []int{-1, 0, 1, 2, 3, 10, 100} {
-		list := genList(size)
-		sorted := make([]gil.Interface, len(list))
-		copy(sorted, list)
+		slice := genSlice(size)
+		sorted := make(gil.Slice, len(slice))
+		copy(sorted, slice)
 		err := Quick(sorted)
-		testSorted(t, "Quick", size, list, sorted, err)
+		testSorted(t, "Quick", size, slice, sorted, err)
 	}
 }
 
-func testSorted(t *testing.T, algo string, size int, list, sorted []gil.Interface, err error) {
+func testSorted(t *testing.T, algo string, size int, slice, sorted gil.Slice, err error) {
 	Convey(fmt.Sprintf("For the %sSort algorithm (size %d)", algo, size), t, func() {
 		Convey("There should be no error", func() {
 			So(err, ShouldBeNil)
 		})
 
-		Convey("Original list should not be modified", func() {
-			So(list, ShouldResemble, genList(size))
+		Convey("Original slice should not be modified", func() {
+			So(slice, ShouldResemble, genSlice(size))
 		})
 
 		Convey("The length should not change", func() {
-			So(len(sorted), ShouldEqual, len(list))
+			So(len(sorted), ShouldEqual, len(slice))
 		})
 
 		if size > 0 {
@@ -74,51 +74,51 @@ func testSorted(t *testing.T, algo string, size int, list, sorted []gil.Interfac
 		}
 
 		Convey("No values should be missing", func() {
-			for _, val := range list {
+			for _, val := range slice {
 				So(sorted, ShouldContain, val)
 			}
 		})
 
 		Convey("No values should be added", func() {
 			for _, val := range sorted {
-				So(list, ShouldContain, val)
+				So(slice, ShouldContain, val)
 			}
 		})
 	})
 }
 
-func benchmarkList(size int) []gil.Interface {
-	list := make([]gil.Interface, size)
+func benchmarkSlice(size int) gil.Slice {
+	slice := make(gil.Slice, size)
 	for i := 0; i < size; i++ {
-		list[i] = gil.Int(rand.Int())
+		slice[i] = gil.Int(rand.Int())
 	}
-	return list
+	return slice
 }
 
 func BenchmarkMergeSort(b *testing.B) {
-	list := benchmarkList(2 ^ 14)
+	slice := benchmarkSlice(2 ^ 14)
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
 		b.StopTimer()
-		copyOfList := make([]gil.Interface, len(list))
-		copy(copyOfList, list)
+		copyOfSlice := make(gil.Slice, len(slice))
+		copy(copyOfSlice, slice)
 		b.StartTimer()
 
-		Merge(copyOfList)
+		Merge(copyOfSlice)
 	}
 }
 
 func BenchmarkQuickSort(b *testing.B) {
-	list := benchmarkList(2 ^ 14)
+	slice := benchmarkSlice(2 ^ 14)
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
 		b.StopTimer()
-		copyOfList := make([]gil.Interface, len(list))
-		copy(copyOfList, list)
+		copyOfSlice := make(gil.Slice, len(slice))
+		copy(copyOfSlice, slice)
 		b.StartTimer()
 
-		Quick(copyOfList)
+		Quick(copyOfSlice)
 	}
 }

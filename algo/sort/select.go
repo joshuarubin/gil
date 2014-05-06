@@ -5,23 +5,23 @@ import "github.com/joshuarubin/gil"
 // TODO(jrubin) test this
 
 // NSmallest implements a partial selection sort. It modifies, in-place,
-// the passed in list such that the n smallest values are placed at the
-// beginning of the list, in order.
-func NSmallest(list []gil.Interface, n int) error {
-	// modifies list
+// the passed in slice such that the n smallest values are placed at the
+// beginning of the slice, in order.
+func NSmallest(slice gil.Slice, n int) error {
+	// modifies slice
 	// uses a partial selection sort
-	for i, val := range list[:n-1] {
+	for i, val := range slice[:n-1] {
 		iMin := i
 		valMin := val
 
-		for j, next := range list[i:] {
+		for j, next := range slice[i:] {
 			if next.Less(valMin) {
 				iMin = j
 				valMin = next
 			}
 		}
 
-		list[i], list[iMin] = list[iMin], list[i] // swap
+		slice[i], slice[iMin] = slice[iMin], slice[i] // swap
 	}
 
 	return nil
