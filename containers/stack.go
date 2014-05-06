@@ -21,7 +21,7 @@ func (s *Stack) Len() int {
 }
 
 // Push an item at the front of the linked list
-func (s *Stack) Push(item interface{}) gil.Queue {
+func (s *Stack) Push(item gil.Interface) gil.Queue {
 	if s.list == nil {
 		s.list = list.New()
 	}
@@ -31,21 +31,21 @@ func (s *Stack) Push(item interface{}) gil.Queue {
 }
 
 // Pop an item off the front of the linked list
-func (s *Stack) Pop() interface{} {
+func (s *Stack) Pop() gil.Interface {
 	if s.list == nil || s.list.Len() == 0 {
 		return nil
 	}
 
 	ret := s.list.Back()
 	s.list.Remove(ret)
-	return ret.Value
+	return ret.Value.(gil.Interface)
 }
 
 // Peek at the item at the front of the stack without removing it
-func (s *Stack) Peek() interface{} {
+func (s *Stack) Peek() gil.Interface {
 	if s.list == nil || s.list.Len() == 0 {
 		return nil
 	}
 
-	return s.list.Back().Value
+	return s.list.Back().Value.(gil.Interface)
 }

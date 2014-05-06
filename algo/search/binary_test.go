@@ -63,12 +63,12 @@ func TestBinarySearch(t *testing.T) {
 			pos, err := Binary(list, gil.String("z"))
 
 			So(pos, ShouldEqual, 0)
-			So(err, ShouldHaveSameTypeAs, gil.TypeMismatchError{})
+			So(err, ShouldHaveSameTypeAs, gil.RangeError{})
 
 			pos, err = Binary(list, gil.Int(4))
 
 			So(pos, ShouldEqual, 0)
-			So(err, ShouldHaveSameTypeAs, gil.TypeMismatchError{})
+			So(err, ShouldHaveSameTypeAs, gil.NotFoundError{})
 		})
 
 		Convey("Comparison checks should fail", func() {
@@ -81,12 +81,12 @@ func TestBinarySearch(t *testing.T) {
 			pos, err := Binary(list, gil.String("z"))
 
 			So(pos, ShouldEqual, 0)
-			So(err, ShouldHaveSameTypeAs, gil.TypeMismatchError{})
+			So(err, ShouldHaveSameTypeAs, gil.NotFoundError{})
 
 			pos, err = Binary(list, gil.Int(4))
 
 			So(pos, ShouldEqual, 0)
-			So(err, ShouldHaveSameTypeAs, gil.TypeMismatchError{})
+			So(err, ShouldHaveSameTypeAs, gil.NotFoundError{})
 		})
 	})
 }

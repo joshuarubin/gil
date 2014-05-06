@@ -52,9 +52,7 @@ func qsPartition(work *qsWork) (int, error) {
 
 	store := 0
 	for i, val := range work.list {
-		if less, err := val.Less(valPivot); err != nil {
-			return 0, err
-		} else if less {
+		if val.Less(valPivot) {
 			// swap list[i] and list[store]
 			work.list[i], work.list[store] = work.list[store], work.list[i]
 			store++

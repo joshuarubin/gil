@@ -15,9 +15,7 @@ func NSmallest(list []gil.Interface, n int) error {
 		valMin := val
 
 		for j, next := range list[i:] {
-			if less, err := next.Less(valMin); err != nil {
-				return err
-			} else if less {
+			if next.Less(valMin) {
 				iMin = j
 				valMin = next
 			}

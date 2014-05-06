@@ -67,11 +67,7 @@ func testSorted(t *testing.T, algo string, size int, list, sorted []gil.Interfac
 			Convey("The values should be in order", func() {
 				prev := sorted[0]
 				for _, val := range sorted[1:] {
-					less, err := val.Less(prev)
-
-					So(err, ShouldBeNil)
-					So(less, ShouldBeFalse)
-
+					So(val.Less(prev), ShouldBeFalse)
 					prev = val
 				}
 			})

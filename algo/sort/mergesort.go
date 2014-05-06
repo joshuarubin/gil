@@ -50,9 +50,7 @@ func msInterleave(parts ...[]gil.Interface) ([]gil.Interface, error) {
 					continue
 				}
 
-				if less, err := d.Peek().Less(min.Peek()); err != nil {
-					return nil, err
-				} else if less {
+				if d.Peek().Less(min.Peek()) {
 					min = d
 				}
 			}

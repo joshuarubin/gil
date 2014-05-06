@@ -4,13 +4,13 @@ package gil
 type Int int
 
 // Less returns true if i Int is smaller than iface Interface
-func (i Int) Less(iface Interface) (bool, error) {
+func (i Int) Less(iface Interface) bool {
 	rhs, ok := iface.(Int)
 	if !ok {
-		return false, TypeMismatchError{i, rhs}
+		return false
 	}
 
-	return i < rhs, nil
+	return i < rhs
 }
 
 // CopyToIntSlice takes a slice of ints and returns a slice of Interfaces.

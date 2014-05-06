@@ -7,19 +7,7 @@ import "github.com/joshuarubin/gil"
 func Binary(list []gil.Interface, val gil.Interface) (int, error) {
 	l := len(list)
 
-	valLess, err := val.Less(list[0])
-
-	if err != nil {
-		return 0, err
-	}
-
-	testLess, err := list[l-1].Less(val)
-
-	if err != nil {
-		return 0, err
-	}
-
-	if valLess || testLess {
+	if val.Less(list[0]) || list[l-1].Less(val) {
 		return 0, gil.RangeError{Interface: val}
 	}
 
@@ -33,13 +21,7 @@ func Binary(list []gil.Interface, val gil.Interface) (int, error) {
 			return half, nil
 		}
 
-		less, err := val.Less(test)
-
-		if err != nil {
-			return 0, err
-		}
-
-		if less {
+		if val.Less(test) {
 			stop = half - 1
 		} else {
 			start = half + 1
