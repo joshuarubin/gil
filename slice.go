@@ -2,8 +2,12 @@ package gil
 
 import "sort"
 
+// Slice is a slice type that contains only objects that implement Interface.
+// It should be homogenous, e.g. every object should be the same type,
+// just as a regular slice would be typed.
 type Slice []Interface
 
+// Find uses a binary search algorithm (sort.Search) to find val in a Slice
 func (s Slice) Find(val Interface) int {
 	l := len(s)
 

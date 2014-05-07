@@ -6,7 +6,6 @@ import (
 	"github.com/joshuarubin/gil"
 )
 
-// A pqHeap implements heap.Interface and holds priorityQueueItems.
 type pqHeap struct {
 	gil.Slice
 }
