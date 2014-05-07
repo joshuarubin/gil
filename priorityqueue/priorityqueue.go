@@ -1,4 +1,4 @@
-package priority
+package priorityqueue
 
 import (
 	"container/heap"
@@ -41,7 +41,7 @@ func New() *PriorityQueue {
 }
 
 // Push an item into the queue
-func (q *PriorityQueue) Push(value gil.Interface) gil.Queue {
+func (q *PriorityQueue) Push(value gil.Interface) gil.QueueInterface {
 	heap.Push(q.heap, value)
 	return q
 }

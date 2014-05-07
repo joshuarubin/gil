@@ -1,9 +1,7 @@
-package queue
+package gil
 
 import (
 	"container/list"
-
-	"github.com/joshuarubin/gil"
 )
 
 // Queue is a generic FIFO implementation
@@ -21,7 +19,7 @@ func (q *Queue) Len() int {
 }
 
 // Push an item onto the end queue
-func (q *Queue) Push(item gil.Interface) gil.Queue {
+func (q *Queue) Push(item Interface) QueueInterface {
 	if q.list == nil {
 		q.list = list.New()
 	}
@@ -31,21 +29,21 @@ func (q *Queue) Push(item gil.Interface) gil.Queue {
 }
 
 // Pop an item off the front of the queue
-func (q *Queue) Pop() gil.Interface {
+func (q *Queue) Pop() Interface {
 	if q.list == nil || q.list.Len() == 0 {
 		return nil
 	}
 
 	ret := q.list.Front()
 	q.list.Remove(ret)
-	return ret.Value.(gil.Interface)
+	return ret.Value.(Interface)
 }
 
 // Peek at the next item in the queue without removing it
-func (q *Queue) Peek() gil.Interface {
+func (q *Queue) Peek() Interface {
 	if q.list == nil || q.list.Len() == 0 {
 		return nil
 	}
 
-	return q.list.Front().Value.(gil.Interface)
+	return q.list.Front().Value.(Interface)
 }

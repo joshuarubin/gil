@@ -1,9 +1,7 @@
-package queue
+package gil
 
 import (
 	"container/list"
-
-	"github.com/joshuarubin/gil"
 )
 
 // Stack is a generic LIFO implementation
@@ -21,7 +19,7 @@ func (s *Stack) Len() int {
 }
 
 // Push an item at the front of the linked list
-func (s *Stack) Push(item gil.Interface) gil.Queue {
+func (s *Stack) Push(item Interface) QueueInterface {
 	if s.list == nil {
 		s.list = list.New()
 	}
@@ -31,21 +29,21 @@ func (s *Stack) Push(item gil.Interface) gil.Queue {
 }
 
 // Pop an item off the front of the linked list
-func (s *Stack) Pop() gil.Interface {
+func (s *Stack) Pop() Interface {
 	if s.list == nil || s.list.Len() == 0 {
 		return nil
 	}
 
 	ret := s.list.Back()
 	s.list.Remove(ret)
-	return ret.Value.(gil.Interface)
+	return ret.Value.(Interface)
 }
 
 // Peek at the item at the front of the stack without removing it
-func (s *Stack) Peek() gil.Interface {
+func (s *Stack) Peek() Interface {
 	if s.list == nil || s.list.Len() == 0 {
 		return nil
 	}
 
-	return s.list.Back().Value.(gil.Interface)
+	return s.list.Back().Value.(Interface)
 }

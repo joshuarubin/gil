@@ -1,23 +1,22 @@
-package queue
+package gil
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/joshuarubin/gil"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 const NUM = 10
 
-func testPopulateQueue(t *testing.T, q gil.Queue, qType string) {
+func testPopulateQueue(t *testing.T, q QueueInterface, qType string) {
 	Convey(fmt.Sprintf("%s Queue should be populated", qType), t, func() {
 		So(q.Len(), ShouldEqual, 0)
 		So(q.Peek(), ShouldBeNil)
 		So(q.Pop(), ShouldBeNil)
 
 		for i := 0; i < NUM; i++ {
-			q.Push(gil.Int(i))
+			q.Push(Int(i))
 			So(q.Len(), ShouldEqual, i+1)
 		}
 

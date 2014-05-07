@@ -10,5 +10,4 @@ A humble attempt to add some common data structures and algorithms to Go in a ge
 So far there are only a few packages.
 
 - [![GoDoc](https://godoc.org/github.com/joshuarubin/gil?status.png) gil](https://godoc.org/github.com/joshuarubin/gil)
-- [![GoDoc](https://godoc.org/github.com/joshuarubin/gil/queue?status.png) queue](http://godoc.org/github.com/joshuarubin/gil/queue)
-- [![GoDoc](https://godoc.org/github.com/joshuarubin/gil/queue/priority?status.png) queue/priority](http://godoc.org/github.com/joshuarubin/gil/queue/priority)
+- [![GoDoc](https://godoc.org/github.com/joshuarubin/gil/priorityqueue?status.png) gil/priorityqueue](http://godoc.org/github.com/joshuarubin/gil/priorityqueue)

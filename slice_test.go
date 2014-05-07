@@ -8,66 +8,16 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestErrors(t *testing.T) {
-	Convey("Errors should work properly", t, func() {
-		So(NotFoundError{Int(0)}.Error(), ShouldEqual, "not found")
-		So(TypeAssertionError{}.Error(), ShouldEqual, "type assertion error")
-		So(ArgumentError("some error text").Error(), ShouldEqual, "some error text")
-	})
-}
-
-func TestInt(t *testing.T) {
-	Convey("Int should work", t, func() {
-		slice := CopyToIntSlice([]int{0, 1, 2, 3, 4, 5})
-
-		prev := slice[0]
-		for i := 1; i < len(slice); i++ {
-			cur := slice[i]
-
-			So(cur, ShouldEqual, i)
-			So(prev.Less(cur), ShouldBeTrue)
-			So(cur.Less(prev), ShouldBeFalse)
-			So(prev == cur, ShouldBeFalse)
-
-			So(prev.Less(String("a")), ShouldBeFalse)
-			So(cur.Less(String("a")), ShouldBeFalse)
-
-			prev = cur
-		}
-	})
-}
-
-func TestString(t *testing.T) {
-	Convey("String should work", t, func() {
-		slice := CopyToStringSlice([]string{"a", "b", "c", "d", "e"})
-
-		prev := slice[0]
-		for i := 1; i < len(slice); i++ {
-			cur := slice[i]
-
-			str, ok := cur.(String)
-			So(ok, ShouldBeTrue)
-			So(len(str), ShouldEqual, 1)
-			So(str[0], ShouldEqual, 'a'+i)
-
-			So(prev.Less(cur), ShouldBeTrue)
-			So(cur.Less(prev), ShouldBeFalse)
-			So(prev == cur, ShouldBeFalse)
-
-			So(prev.Less(Int(1)), ShouldBeFalse)
-			So(cur.Less(Int(1)), ShouldBeFalse)
-
-			prev = cur
-		}
-	})
-}
-
 type Result struct {
 	Pos   int
 	Found bool
 }
 
-func TestFind(t *testing.T) {
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+func TestSliceFind(t *testing.T) {
 	slice := CopyToIntSlice([]int{1, 3, 5, 6, 7, 9})
 	expect := map[Int]Result{
 		0:  {Pos: 0, Found: false},
@@ -135,10 +85,6 @@ func TestFind(t *testing.T) {
 	})
 }
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
-
 func testSorted(t *testing.T, slice, sorted Slice) {
 	Convey(fmt.Sprintf("For sorting a random int slice (size %d)", len(slice)), t, func() {
 		Convey("The length should not change", func() {
@@ -201,7 +147,7 @@ func BenchmarkSort(b *testing.B) {
 	}
 }
 
-func TestSort(t *testing.T) {
+func TestSliceSort(t *testing.T) {
 	for _, size := range []int{0, 1, 2, 3, 10, 100} {
 		slice := genSlice(size)
 		sorted := make(Slice, size)
